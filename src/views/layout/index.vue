@@ -1,13 +1,46 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import {
-  Document,
-  Menu as IconMenu,
-  Location,
-  Setting,
-} from '@element-plus/icons-vue'
+import { ref,onMounted } from 'vue'
+import { Setting } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from "element-plus";
+import {useRouter} from "vue-router";
 
+const router = useRouter()
 const value = ref(true)
+const loginName = ref();
+
+const getLoginName = () => {
+  const loginUser = JSON.parse(localStorage.getItem("loginUser"));
+  if (loginUser && loginUser.token) {
+    loginName.value = loginUser.name;
+  }
+}
+
+const logOut = () => {
+  ElMessageBox.confirm("您确定要退出吗？", "Warning", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then( () => {
+      localStorage.removeItem("loginUser");
+      router.push("/login");
+      ElMessage({
+        type: "success",
+        message: "退出成功",
+      });
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "操作取消",
+      });
+    });
+}
+
+onMounted(()=>{
+  getLoginName();
+})
+
 </script>
 
 <template>
@@ -20,8 +53,8 @@ const value = ref(true)
           <a href="">
             <el-icon><EditPen /></el-icon> 修改密码 &nbsp;&nbsp;&nbsp; |  &nbsp;&nbsp;&nbsp;
           </a>
-          <a href="">
-            <el-icon><SwitchButton /></el-icon> 退出登录
+          <a href="javascript:void(0)" @click="logOut">
+            <el-icon><SwitchButton /></el-icon> 退出登录【{{loginName}}】
           </a>
         </span>
       </el-header>
